@@ -1,6 +1,4 @@
 # Concurrent-Image-Processing
 
-The goal of this project is to test if utilizing a CUDA (c++) concurrent tool would reduce the time required to perform the following transformations:
-- Colour transformation
+The goal of this project is to utilizing a CUDA (c++) concurrent tool to reduce the time required to perform the following transformation:
 - Gaussian Blur
-- ✨Edge Detection, using Sobel's Operation✨
