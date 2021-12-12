@@ -1,26 +1,20 @@
-#define PI 3.1415
 #include <iostream>
 #include "Image.h"
 #include <stdlib.h>
 #include <chrono>
 #include "stb_image.h"
 #include <stdio.h>
+#include <fstream>
 
 void getTimeGrayscale(const char* test);
+void GaussianBlur(double kernel[], int diamension, const char* filename, int fileNumber);
 
 using namespace std;
 
 
 int main()
 {
-  
-    /// GrayScale Code
-   /* const char* image_file_array[8] = { "img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg", "img6.jpg", "img7.jpg", "img8.jpg"};
-    for (int i = 0; i < 8; i++)
-    {
-        getTimeGrayscale(image_file_array[i]);
-    }*/
-
+ 
     double ker3x3[9] = {
         1, 3, 1,
         3, 9, 3,
@@ -45,24 +39,37 @@ int main()
        1,4,7,10,7,4,1
     };
 
+    const char* image_file_array[8] = { "img1.jpg", "img2.jpg", "img3.jpeg", "img4.jpg", "img5.jpg", "img6.jpg", "img7.jpg", "img8.jpg" };
 
-    Image test("img1.jpg");
-    test.std_convolve_clamp_to_0(0, 3, 3, ker3x3);
-    test.std_convolve_clamp_to_0(1, 3, 3, ker3x3);
-    test.std_convolve_clamp_to_0(2, 3, 3, ker3x3);
-    test.write("new.png");
- 
-    Image test2("img1.jpg");
-    test2.std_convolve_clamp_to_0(0, 5, 5, ker5x5);
-    test2.std_convolve_clamp_to_0(1, 5, 5, ker5x5);
-    test2.std_convolve_clamp_to_0(2, 5, 5, ker5x5);
-    test2.write("new2.png");
+    for (int i = 0; i < 8; i++)
+    {
+         GaussianBlur(ker5x5, 5, image_file_array[i], i);
+    }
 
-    Image test3("img1.jpg");
-    test3.std_convolve_clamp_to_0(0, 7, 7, ker7x7);
-    test3.std_convolve_clamp_to_0(1, 7, 7, ker7x7);
-    test3.std_convolve_clamp_to_0(2, 7, 7, ker7x7);
-    test3.write("new3.png");
+}
+
+
+void GaussianBlur(double kernel[], int diamension, const char* filename, int fileNumber) {
+
+    Image img(filename);
+
+    
+    auto start = chrono::steady_clock::now();
+    for (int i = 0; i < img.channels; i++)
+    {
+        img.std_convolve_clamp_to_0(i, diamension, diamension, kernel);
+    }
+    auto end = chrono::steady_clock::now();
+   auto time= chrono::duration_cast<chrono::milliseconds>(end - start).count();
+
+    std::cout << "Elapsed time in milliseconds: " << time << " ms" << endl;
+    std::cout << "=========================================================" << endl;
+
+    std::ofstream myfile;
+    myfile.open("resultTime.csv", std::ios_base::app);
+    myfile << time << "," << fileNumber + 1 << endl;
+    myfile.close();
+
 }
 
 void getTimeGrayscale(const char* filename) {

@@ -85,6 +85,10 @@ Image:: ~Image() {
 		 {
 			 return TGA;
 		 }
+		 else if (strcmp(ext, ".jpeg") == 0)
+		 {
+			 return JPEG;
+		 }
 	 }
 	 return PNG;
  }
