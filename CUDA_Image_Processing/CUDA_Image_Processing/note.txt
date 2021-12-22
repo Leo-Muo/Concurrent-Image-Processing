@@ -1,0 +1,96 @@
+
+    /*channel++;
+    cudaMemcpy(dev_channel, &channel, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_output_image, output_img, size * sizeof(unsigned char), cudaMemcpyHostToDevice);
+    gaussian_blur << <1, 30 >> > (dev_channel, dev_ker_w, dev_ker_h, dev_kern, dev_channels, dev_size, dev_width, dev_height, dev_image, dev_output_image);
+    printf("=========================================\n");
+    cudaDeviceSynchronize();
+    cudaMemcpy(output_img, dev_output_image, size * sizeof(unsigned char), cudaMemcpyDeviceToHost);
+
+    channel++;
+    cudaMemcpy(dev_channel, &channel, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_output_image, output_img, size * sizeof(unsigned char), cudaMemcpyHostToDevice);
+    gaussian_blur << <1, 30>> > (dev_channel, dev_ker_w, dev_ker_h, dev_kern, dev_channels, dev_size, dev_width, dev_height, dev_image, dev_output_image);
+    cudaDeviceSynchronize();
+    printf("=========================================\n");
+    cudaMemcpy(output_img, dev_output_image, size * sizeof(unsigne* char), cudaMemcpyDeviceToHost);*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const auto slice_size = *dev_size / blockDim.x;
+   // unsigned long start_index = slice_size * threadIdx.x;
+   //const auto img_row = *dev_size / *dev_width;
+    
+    unsigned long start_index = slice_size * threadIdx.x;
+    unsigned long end_index;
+    if (threadIdx.x == blockDim.x - 1) {
+        end_index = *dev_size;
+    }
+    else {
+        end_index = slice_size * (threadIdx.x + 1);
+    }
+
+
+    int dmo = 0;
+    for (int i = 0; i < ((*dev_ker_h) * (*dev_ker_w)); i++)
+    {
+        dmo += dev_kern[i];
+    }
+
+    unsigned char* new_data = new unsigned char[(*dev_width) * (*dev_height)];
+
+    int cr = (*dev_ker_w - 1) / 2;
+    int cc = (*dev_ker_h - 1) / 2;
+    int center = cr * (*dev_ker_w) + cc;
+
+    printf("Thread: %d => start: %d <=> end: %d \n", threadIdx.x, start_index, end_index);
+
+
+    int channel = blockIdx.x;
+
+
+    for (int k = channel + start_index; k < end_index; k += *dev_channels) {
+        double sum = 0;
+
+
+        for (long i = -((long)cr); i < (long)*dev_ker_h - cr; ++i) {
+            long row = ((long)k / (*dev_channels)) / (*dev_width) - i;
+            if (row < 0 || row >(*dev_height) - 1) {
+                continue;
+            }
+
+            for (long j = -((long)cc); j < (long)*dev_ker_w - cc; ++j) {
+                long col = ((long)k / (*dev_channels)) % (*dev_width) - j;
+                if (col < 0 || col >(*dev_width) - 1) {
+                    continue;
+                }
+                sum += dev_kern[center + i * (long)*dev_ker_w + j] * dev_image[(row * (*dev_width) + col) * (*dev_channels) + channel];
+             
+            }
+        }
+
+
+        new_data[k / (*dev_channels)] = (unsigned char)BYTE_BOUND(round(sum / dmo));
+    }
+    for (int k = channel + start_index; k < channel + end_index; k += *dev_channels) {
+        dev_output_image[k] = new_data[k / (*dev_channels)];
+    }
+
+    __syncthreads();

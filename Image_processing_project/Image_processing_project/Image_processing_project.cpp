@@ -41,27 +41,27 @@ int main()
 
     const char* image_file_array[8] = { "img1.jpg", "img2.jpg", "img3.jpeg", "img4.jpg", "img5.jpg", "img6.jpg", "img7.jpg", "img8.jpg" };
 
-    for (int i = 0; i < 8; i++)
+    /*for (int i = 0; i < 8; i++)
     {
          GaussianBlur(ker5x5, 5, image_file_array[i], i);
-    }
+    }*/
+
+    GaussianBlur(ker7x7, 7, image_file_array[1], 2);
 
 }
 
 
 void GaussianBlur(double kernel[], int diamension, const char* filename, int fileNumber) {
 
-    Image img(filename);
-
-    
     auto start = chrono::steady_clock::now();
+    Image img(filename);
     for (int i = 0; i < img.channels; i++)
     {
         img.std_convolve_clamp_to_0(i, diamension, diamension, kernel);
     }
+    img.write("res.png");
     auto end = chrono::steady_clock::now();
-   auto time= chrono::duration_cast<chrono::milliseconds>(end - start).count();
-
+    auto time= chrono::duration_cast<chrono::milliseconds>(end - start).count();
     std::cout << "Elapsed time in milliseconds: " << time << " ms" << endl;
     std::cout << "=========================================================" << endl;
 

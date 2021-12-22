@@ -125,7 +125,6 @@ Image:: ~Image() {
 
 	 for (int k = channel; k < size; k += channels) {
 		 double sum = 0;
-		 std::vector<double> temp;
 
 		 for (long i = -((long)cr); i < (long)ker_h - cr; ++i) {
 			 long row = ((long)k / channels) / w-i;
